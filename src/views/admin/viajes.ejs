@@ -81,7 +81,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
         .btn-primary {
@@ -89,9 +89,35 @@
             color: white;
         }
 
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
         .btn-success {
-            background: #2ecc71;
+            background: #27ae60;
             color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
         }
 
         .btn-sm {
@@ -211,6 +237,11 @@
             width: 100%;
         }
 
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -230,6 +261,12 @@
             border-radius: 5px;
         }
 
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
         .modal-actions {
             display: flex;
             gap: 10px;
@@ -240,6 +277,57 @@
         .loader {
             text-align: center;
             padding: 20px;
+            color: #3498db;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .detalle-viaje {
+            margin-top: 20px;
+        }
+
+        .detalle-viaje .info-row {
+            display: flex;
+            padding: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .detalle-viaje .info-label {
+            font-weight: 600;
+            width: 150px;
+            color: #2c3e50;
+        }
+
+        .detalle-viaje .info-value {
+            color: #555;
         }
     </style>
 </head>
@@ -265,10 +353,14 @@
             <button class="btn btn-primary" onclick="logout()">Cerrar Sesión</button>
         </div>
 
+        <div id="alertContainer"></div>
+
         <div class="content-section">
             <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
                 <h2>Viajes Programados y Realizados</h2>
-                <button class="btn btn-success" onclick="abrirModalCrear()">+ Nuevo Viaje</button>
+                <button class="btn btn-success" onclick="abrirModalCrear()">
+                    + Nuevo Viaje
+                </button>
             </div>
 
             <div class="filters">
@@ -292,58 +384,102 @@
                 </div>
             </div>
 
-            <div id="loader" class="loader" style="display:none;">Cargando viajes...</div>
+            <div id="loader" class="loader" style="display:none;">
+                Cargando viajes...
+            </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Ruta</th>
-                        <th>Conductor</th>
-                        <th>Hora Salida</th>
-                        <th>Estado</th>
-                        <th>Pasajeros</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="viajesBody">
-                </tbody>
-            </table>
+            <div id="tableContainer">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Ruta</th>
+                            <th>Conductor</th>
+                            <th>Hora Salida</th>
+                            <th>Estado</th>
+                            <th>Pasajeros</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="viajesBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <p>No se encontraron viajes con los filtros aplicados</p>
+            </div>
         </div>
     </div>
 
-    <!-- Modal Crear Viaje -->
+    <!-- Modal Crear/Editar Viaje -->
     <div id="modalViaje" class="modal">
         <div class="modal-content">
-            <h3>Nuevo Viaje</h3>
+            <h3 id="modalTitulo">Nuevo Viaje</h3>
             <form id="formViaje">
+                <input type="hidden" id="viajeId">
                 <div class="form-group">
-                    <label>Ruta:</label>
+                    <label>Ruta: *</label>
                     <select id="id_ruta" required>
                         <option value="">Seleccione una ruta</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Conductor:</label>
+                    <label>Conductor: *</label>
                     <select id="id_conductor" required>
                         <option value="">Seleccione un conductor</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Fecha:</label>
+                    <label>Fecha: *</label>
                     <input type="date" id="fecha" required>
                 </div>
                 <div class="form-group">
-                    <label>Hora Salida:</label>
+                    <label>Hora Salida: *</label>
                     <input type="time" id="hora_salida" required>
                 </div>
                 <div class="form-group">
-                    <label>Hora Llegada:</label>
+                    <label>Hora Llegada Estimada: *</label>
                     <input type="time" id="hora_llegada" required>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Crear Viaje</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Viaje -->
+    <div id="modalDetalle" class="modal">
+        <div class="modal-content">
+            <h3>Detalle del Viaje</h3>
+            <div id="detalleViaje" class="detalle-viaje"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" onclick="cerrarModalDetalle()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Estado -->
+    <div id="modalEstado" class="modal">
+        <div class="modal-content">
+            <h3>Cambiar Estado del Viaje</h3>
+            <form id="formEstado">
+                <input type="hidden" id="estadoViajeId">
+                <div class="form-group">
+                    <label>Nuevo Estado: *</label>
+                    <select id="nuevoEstado" required>
+                        <option value="">Seleccione un estado</option>
+                        <option value="programado">Programado</option>
+                        <option value="en_curso">En Curso</option>
+                        <option value="finalizado">Finalizado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" onclick="cerrarModalEstado()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar Estado</button>
                 </div>
             </form>
         </div>
@@ -351,41 +487,68 @@
 
     <script>
         let viajes = [];
+        let rutas = [];
+        let editando = false;
 
+        // Función para mostrar alertas
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.textContent = mensaje;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Cargar viajes
         async function cargarViajes(filtros = {}) {
-            document.getElementById('loader').style.display = 'block';
+            const loader = document.getElementById('loader');
+            const tableContainer = document.getElementById('tableContainer');
+            const emptyState = document.getElementById('emptyState');
             
-            const params = new URLSearchParams(filtros);
-            
-            try {
-                const response = await fetch(`/api/admin/viajes?${params}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+            loader.style.display = 'block';
+            tableContainer.style.display = 'none';
+            emptyState.style.display = 'none';
 
+            try {
+                const params = new URLSearchParams();
+                if (filtros.estado) params.append('estado', filtros.estado);
+                if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+                if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+
+                const response = await fetch(`/api/admin/viajes?${params}`);
                 const result = await response.json();
+
+                loader.style.display = 'none';
 
                 if (result.success) {
                     viajes = result.data;
-                    renderizarViajes(viajes);
+                    if (viajes.length > 0) {
+                        renderizarViajes(viajes);
+                        tableContainer.style.display = 'block';
+                    } else {
+                        emptyState.style.display = 'block';
+                    }
+                } else {
+                    mostrarAlerta('Error al cargar viajes: ' + result.message, 'danger');
+                    emptyState.style.display = 'block';
                 }
             } catch (error) {
-                alert('Error al cargar viajes: ' + error.message);
-            } finally {
-                document.getElementById('loader').style.display = 'none';
+                loader.style.display = 'none';
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
+                emptyState.style.display = 'block';
             }
         }
 
+        // Renderizar viajes
         function renderizarViajes(viajes) {
             const tbody = document.getElementById('viajesBody');
-            
-            if (viajes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px;">No hay viajes registrados</td></tr>';
-                return;
-            }
+            tbody.innerHTML = '';
 
-            tbody.innerHTML = viajes.map(viaje => {
+            viajes.forEach(viaje => {
                 const estadoBadge = {
                     'programado': 'badge-warning',
                     'en_curso': 'badge-info',
@@ -393,57 +556,85 @@
                     'cancelado': 'badge-danger'
                 }[viaje.estado] || 'badge-warning';
 
-                const fecha = new Date(viaje.fecha);
+                const fecha = new Date(viaje.fecha + 'T00:00:00');
                 const fechaFormateada = fecha.toLocaleDateString('es-CO');
 
-                return `
-                    <tr>
-                        <td>${fechaFormateada}</td>
-                        <td>${viaje.ruta_nombre || 'N/A'}</td>
-                        <td>${viaje.conductor_nombre || 'Sin asignar'}</td>
-                        <td>${viaje.hora_salida}</td>
-                        <td><span class="badge ${estadoBadge}">${viaje.estado}</span></td>
-                        <td>${viaje.pasajeros_totales || 0}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" onclick="verDetalle(${viaje.id_viaje})">
-                                Ver Detalle
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${fechaFormateada}</td>
+                    <td>${viaje.ruta_nombre || 'N/A'}</td>
+                    <td>${viaje.conductor_nombre || 'Sin asignar'}</td>
+                    <td>${viaje.hora_salida}</td>
+                    <td><span class="badge ${estadoBadge}">${viaje.estado.replace('_', ' ')}</span></td>
+                    <td>${viaje.pasajeros_totales || 0}</td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-primary" onclick="verDetalle(${viaje.id_viaje})">
+                            Ver
+                        </button>
+                        ${viaje.estado === 'programado' ? `
+                            <button class="btn btn-sm btn-warning" onclick="editarViaje(${viaje.id_viaje})">
+                                Editar
                             </button>
-                        </td>
-                    </tr>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarViaje(${viaje.id_viaje})">
+                                Eliminar
+                            </button>
+                        ` : ''}
+                        ${viaje.estado !== 'cancelado' && viaje.estado !== 'finalizado' ? `
+                            <button class="btn btn-sm btn-info" onclick="abrirModalEstado(${viaje.id_viaje})">
+                                Estado
+                            </button>
+                        ` : ''}
+                    </td>
                 `;
-            }).join('');
+                tbody.appendChild(row);
+            });
         }
 
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const filtros = {
+                estado: document.getElementById('filtroEstado').value,
+                fechaInicio: document.getElementById('fechaInicio').value,
+                fechaFin: document.getElementById('fechaFin').value
+            };
+            cargarViajes(filtros);
+        }
+
+        // Abrir modal crear
         async function abrirModalCrear() {
-            // Cargar rutas y conductores
-            await Promise.all([
-                cargarRutas(),
-                cargarConductores()
-            ]);
-            
+            editando = false;
+            document.getElementById('viajeId').value = '';
+            document.getElementById('modalTitulo').textContent = 'Nuevo Viaje';
             document.getElementById('formViaje').reset();
+            
+            // Establecer fecha mínima como hoy
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').min = hoy;
+            
+            await Promise.all([cargarRutas(), cargarConductores()]);
             document.getElementById('modalViaje').classList.add('active');
         }
 
+        // Cargar rutas
         async function cargarRutas() {
             try {
-                const response = await fetch('/api/admin/rutas', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+                const response = await fetch('/api/admin/rutas');
                 const result = await response.json();
                 
                 if (result.success) {
+                    rutas = result.data;
                     const select = document.getElementById('id_ruta');
                     select.innerHTML = '<option value="">Seleccione una ruta</option>' +
-                        result.data.map(r => `<option value="${r.id_ruta}">${r.nombre}</option>`).join('');
+                        result.data.map(r => 
+                            `<option value="${r.id_ruta}">${r.nombre} (${r.distancia_km} km)</option>`
+                        ).join('');
                 }
             } catch (error) {
                 console.error('Error al cargar rutas:', error);
             }
         }
 
+        // Cargar conductores
         async function cargarConductores() {
             try {
                 const fecha = document.getElementById('fecha').value;
@@ -451,53 +642,146 @@
                     ? `/api/admin/conductores/disponibles?fecha=${fecha}`
                     : '/api/admin/conductores/disponibles';
                 
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+                const response = await fetch(url);
                 const result = await response.json();
                 
                 if (result.success) {
                     const select = document.getElementById('id_conductor');
+                    const conductorActual = select.value;
                     select.innerHTML = '<option value="">Seleccione un conductor</option>' +
-                        result.data.map(c => `<option value="${c.id_usuario}">${c.nombre}</option>`).join('');
+                        result.data.map(c => 
+                            `<option value="${c.id_usuario}">${c.nombre}</option>`
+                        ).join('');
+                    
+                    // Restaurar valor si estamos editando
+                    if (conductorActual && editando) {
+                        select.value = conductorActual;
+                    }
                 }
             } catch (error) {
                 console.error('Error al cargar conductores:', error);
             }
         }
 
+        // Editar viaje
+        async function editarViaje(id) {
+            editando = true;
+            const viaje = viajes.find(v => v.id_viaje === id);
+            if (!viaje) return;
+
+            document.getElementById('modalTitulo').textContent = 'Editar Viaje';
+            document.getElementById('viajeId').value = id;
+            
+            await Promise.all([cargarRutas(), cargarConductores()]);
+            
+            document.getElementById('id_ruta').value = viaje.id_ruta;
+            document.getElementById('id_conductor').value = viaje.id_conductor;
+            document.getElementById('fecha').value = viaje.fecha.split('T')[0];
+            document.getElementById('hora_salida').value = viaje.hora_salida;
+            document.getElementById('hora_llegada').value = viaje.hora_llegada;
+            
+            document.getElementById('modalViaje').classList.add('active');
+        }
+
+        // Ver detalle
+        async function verDetalle(id) {
+            try {
+                const response = await fetch(`/api/admin/viajes/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const viaje = result.data;
+                    const fecha = new Date(viaje.fecha + 'T00:00:00').toLocaleDateString('es-CO');
+                    
+                    document.getElementById('detalleViaje').innerHTML = `
+                        <div class="info-row">
+                            <span class="info-label">ID Viaje:</span>
+                            <span class="info-value">#${viaje.id_viaje}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha:</span>
+                            <span class="info-value">${fecha}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ruta:</span>
+                            <span class="info-value">${viaje.ruta_nombre} (${viaje.distancia_km} km)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Conductor:</span>
+                            <span class="info-value">${viaje.conductor_nombre} - ${viaje.conductor_telefono}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Hora Salida:</span>
+                            <span class="info-value">${viaje.hora_salida}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Hora Llegada:</span>
+                            <span class="info-value">${viaje.hora_llegada}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Estado:</span>
+                            <span class="info-value">${viaje.estado}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Pasajeros:</span>
+                            <span class="info-value">${viaje.pasajeros_totales || 0}</span>
+                        </div>
+                    `;
+                    
+                    document.getElementById('modalDetalle').classList.add('active');
+                }
+            } catch (error) {
+                mostrarAlerta('Error al cargar detalle: ' + error.message, 'danger');
+            }
+        }
+
+        // Eliminar viaje
+        async function eliminarViaje(id) {
+            if (!confirm('¿Está seguro de eliminar este viaje?')) return;
+
+            try {
+                const response = await fetch(`/api/admin/viajes/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarAlerta('Viaje eliminado exitosamente', 'success');
+                    cargarViajes();
+                } else {
+                    mostrarAlerta('Error: ' + result.message, 'danger');
+                }
+            } catch (error) {
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
+            }
+        }
+
+        // Abrir modal estado
+        function abrirModalEstado(id) {
+            document.getElementById('estadoViajeId').value = id;
+            document.getElementById('nuevoEstado').value = '';
+            document.getElementById('modalEstado').classList.add('active');
+        }
+
+        // Cerrar modales
         function cerrarModal() {
             document.getElementById('modalViaje').classList.remove('active');
         }
 
-        function aplicarFiltros() {
-            const filtros = {
-                estado: document.getElementById('filtroEstado').value,
-                fechaInicio: document.getElementById('fechaInicio').value,
-                fechaFin: document.getElementById('fechaFin').value
-            };
-            
-            // Remover valores vacíos
-            Object.keys(filtros).forEach(key => {
-                if (!filtros[key]) delete filtros[key];
-            });
-            
-            cargarViajes(filtros);
+        function cerrarModalDetalle() {
+            document.getElementById('modalDetalle').classList.remove('active');
         }
 
-        function verDetalle(id) {
-            // Por ahora solo mostramos un alert, puedes expandir esto
-            const viaje = viajes.find(v => v.id_viaje === id);
-            if (viaje) {
-                alert(`Detalle del viaje:\n\nRuta: ${viaje.ruta_nombre}\nConductor: ${viaje.conductor_nombre}\nFecha: ${viaje.fecha}\nEstado: ${viaje.estado}`);
-            }
+        function cerrarModalEstado() {
+            document.getElementById('modalEstado').classList.remove('active');
         }
 
+        // Submit crear/editar viaje
         document.getElementById('formViaje').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const id = document.getElementById('viajeId').value;
             const datos = {
                 id_ruta: parseInt(document.getElementById('id_ruta').value),
                 id_conductor: parseInt(document.getElementById('id_conductor').value),
@@ -507,11 +791,13 @@
             };
 
             try {
-                const response = await fetch('/api/admin/viajes', {
-                    method: 'POST',
+                const url = id ? `/api/admin/viajes/${id}` : '/api/admin/viajes';
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(datos)
                 });
@@ -519,26 +805,66 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('Viaje creado exitosamente');
+                    mostrarAlerta(result.message, 'success');
                     cerrarModal();
                     cargarViajes();
                 } else {
-                    alert('Error: ' + result.message);
+                    mostrarAlerta('Error: ' + result.message, 'danger');
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
+            }
+        });
+
+        // Submit cambiar estado
+        document.getElementById('formEstado').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('estadoViajeId').value;
+            const estado = document.getElementById('nuevoEstado').value;
+
+            try {
+                const response = await fetch(`/api/admin/viajes/${id}/estado`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ estado })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarAlerta(result.message, 'success');
+                    cerrarModalEstado();
+                    cargarViajes();
+                } else {
+                    mostrarAlerta('Error: ' + result.message, 'danger');
+                }
+            } catch (error) {
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
             }
         });
 
         // Actualizar conductores al cambiar fecha
         document.getElementById('fecha').addEventListener('change', cargarConductores);
 
+        // Logout
         function logout() {
-            localStorage.removeItem('token');
-            location.href = '/login';
+            if (confirm('¿Está seguro de cerrar sesión?')) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
         }
 
-        // Cargar al iniciar
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Cargar viajes al iniciar
         cargarViajes();
     </script>
 </body>

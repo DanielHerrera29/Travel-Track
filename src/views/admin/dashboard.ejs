@@ -25,6 +25,7 @@
             background: #2c3e50;
             color: white;
             padding: 20px 0;
+            overflow-y: auto;
         }
 
         .sidebar-header {
@@ -80,6 +81,24 @@
             gap: 10px;
         }
 
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -92,12 +111,18 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
 
         .stat-card h3 {
             color: #7f8c8d;
             font-size: 14px;
             margin-bottom: 10px;
+            text-transform: uppercase;
         }
 
         .stat-card .value {
@@ -129,33 +154,6 @@
         .section-header h2 {
             color: #2c3e50;
             font-size: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-
-        .btn-success {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #27ae60;
         }
 
         .table-container {
@@ -207,88 +205,75 @@
             color: #721c24;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            color: #2c3e50;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #2c3e50;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .form-group .error {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
         }
 
         .loader {
-            display: none;
             text-align: center;
             padding: 20px;
+            color: #3498db;
         }
 
-        .loader.active {
-            display: block;
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .action-card i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+
+        .action-card h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .action-card p {
+            color: #7f8c8d;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h2>Sistema de Transporte</h2>
@@ -304,9 +289,7 @@
         </ul>
     </div>
 
-    <!-- Contenido Principal -->
     <div class="main-content">
-        <!-- Barra Superior -->
         <div class="top-bar">
             <h1>Dashboard</h1>
             <div class="user-info">
@@ -315,7 +298,9 @@
             </div>
         </div>
 
-        <!-- Estadísticas -->
+        <div id="alertContainer"></div>
+
+        <!-- Estadísticas Principales -->
         <div class="stats-grid">
             <div class="stat-card primary">
                 <h3>Viajes Hoy</h3>
@@ -335,58 +320,144 @@
             </div>
         </div>
 
+        <!-- Acciones Rápidas -->
+        <div class="quick-actions">
+            <div class="action-card" onclick="location.href='/admin/viajes'">
+                <div style="font-size: 32px; margin-bottom: 10px;">🚌</div>
+                <h4>Nuevo Viaje</h4>
+                <p>Programar viaje</p>
+            </div>
+            <div class="action-card" onclick="location.href='/admin/usuarios'">
+                <div style="font-size: 32px; margin-bottom: 10px;">👤</div>
+                <h4>Nuevo Conductor</h4>
+                <p>Registrar conductor</p>
+            </div>
+            <div class="action-card" onclick="location.href='/admin/costos'">
+                <div style="font-size: 32px; margin-bottom: 10px;">💰</div>
+                <h4>Registrar Costo</h4>
+                <p>Gastos operativos</p>
+            </div>
+            <div class="action-card" onclick="location.href='/admin/reportes'">
+                <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+                <h4>Reportes</h4>
+                <p>Ver análisis</p>
+            </div>
+        </div>
+
         <!-- Viajes Recientes -->
         <div class="content-section">
             <div class="section-header">
                 <h2>Viajes Recientes</h2>
-                <button class="btn btn-primary" onclick="location.href='/admin/viajes'">Ver Todos</button>
+                <button class="btn btn-primary" onclick="location.href='/admin/viajes'">
+                    Ver Todos
+                </button>
             </div>
-            <div class="loader" id="viajesLoader">Cargando...</div>
-            <div class="table-container">
-                <table id="viajesTable">
+            
+            <div id="viajesLoader" class="loader" style="display:none;">
+                Cargando viajes...
+            </div>
+
+            <div id="viajesTableContainer" class="table-container">
+                <table>
                     <thead>
                         <tr>
+                            <th>Fecha</th>
                             <th>Ruta</th>
                             <th>Conductor</th>
-                            <th>Fecha Salida</th>
+                            <th>Hora Salida</th>
                             <th>Estado</th>
                             <th>Pasajeros</th>
                         </tr>
                     </thead>
                     <tbody id="viajesBody">
-                        <!-- Datos dinámicos -->
                     </tbody>
                 </table>
+            </div>
+
+            <div id="viajesEmpty" class="empty-state" style="display:none;">
+                <p>No hay viajes registrados hoy</p>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import AdminViewModel from '/js/viewmodels/AdminViewModel.js';
+    <script>
+        // Función para mostrar alertas
+        function mostrarAlerta(mensaje, tipo = 'danger') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.textContent = mensaje;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
 
-        const viewModel = new AdminViewModel();
+        // Cargar estadísticas del dashboard
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch('/api/admin/dashboard/stats');
+                const result = await response.json();
 
-        // Cargar estadísticas al iniciar
-        async function cargarDashboard() {
-            const stats = await viewModel.cargarEstadisticas();
-            if (stats.success) {
-                document.getElementById('viajesHoy').textContent = stats.data.viajesHoy;
-                document.getElementById('conductoresActivos').textContent = stats.data.conductoresActivos;
-                document.getElementById('clientesRegistrados').textContent = stats.data.clientesRegistrados;
-                document.getElementById('ingresosDelMes').textContent = 
-                    '$' + stats.data.ingresosDelMes.toLocaleString('es-CO');
-            }
-
-            // Cargar viajes recientes
-            document.getElementById('viajesLoader').classList.add('active');
-            const viajes = await viewModel.cargarViajes({ limit: 5 });
-            document.getElementById('viajesLoader').classList.remove('active');
-
-            if (viajes.success) {
-                renderizarViajes(viajes.data);
+                if (result.success) {
+                    const data = result.data;
+                    
+                    document.getElementById('viajesHoy').textContent = data.viajesHoy || 0;
+                    document.getElementById('conductoresActivos').textContent = data.conductoresActivos || 0;
+                    document.getElementById('clientesRegistrados').textContent = data.clientesRegistrados || 0;
+                    document.getElementById('ingresosDelMes').textContent = 
+                        '$' + (data.ingresosDelMes || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+                } else {
+                    mostrarAlerta('Error al cargar estadísticas: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('Error de conexión al cargar estadísticas');
             }
         }
 
+        // Cargar viajes recientes
+        async function cargarViajesRecientes() {
+            const loader = document.getElementById('viajesLoader');
+            const tableContainer = document.getElementById('viajesTableContainer');
+            const emptyState = document.getElementById('viajesEmpty');
+            
+            loader.style.display = 'block';
+            tableContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            try {
+                // Obtener fecha de hoy
+                const hoy = new Date().toISOString().split('T')[0];
+                
+                const response = await fetch(`/api/admin/viajes?fechaInicio=${hoy}&fechaFin=${hoy}`);
+                const result = await response.json();
+
+                loader.style.display = 'none';
+
+                if (result.success) {
+                    const viajes = result.data;
+                    
+                    if (viajes.length > 0) {
+                        renderizarViajes(viajes.slice(0, 10)); // Mostrar máximo 10
+                        tableContainer.style.display = 'block';
+                    } else {
+                        emptyState.style.display = 'block';
+                    }
+                } else {
+                    mostrarAlerta('Error al cargar viajes: ' + result.message);
+                    emptyState.style.display = 'block';
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                console.error('Error:', error);
+                mostrarAlerta('Error de conexión al cargar viajes');
+                emptyState.style.display = 'block';
+            }
+        }
+
+        // Renderizar viajes en la tabla
         function renderizarViajes(viajes) {
             const tbody = document.getElementById('viajesBody');
             tbody.innerHTML = '';
@@ -394,31 +465,67 @@
             viajes.forEach(viaje => {
                 const estadoBadge = {
                     'programado': 'badge-warning',
-                    'en_curso': 'badge-success',
-                    'completado': 'badge-success',
+                    'en_curso': 'badge-info',
+                    'finalizado': 'badge-success',
                     'cancelado': 'badge-danger'
-                }[viaje.estado] || '';
+                }[viaje.estado] || 'badge-warning';
 
-                const row = `
-                    <tr>
-                        <td>${viaje.ruta.origen} - ${viaje.ruta.destino}</td>
-                        <td>${viaje.conductor.nombre}</td>
-                        <td>${new Date(viaje.fechaSalida).toLocaleString('es-CO')}</td>
-                        <td><span class="badge ${estadoBadge}">${viaje.estado}</span></td>
-                        <td>${viaje.pasajeros || 0}</td>
-                    </tr>
+                const fecha = new Date(viaje.fecha + 'T00:00:00');
+                const fechaFormateada = fecha.toLocaleDateString('es-CO');
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${fechaFormateada}</td>
+                    <td>${viaje.ruta_nombre || 'N/A'}</td>
+                    <td>${viaje.conductor_nombre || 'Sin asignar'}</td>
+                    <td>${viaje.hora_salida}</td>
+                    <td><span class="badge ${estadoBadge}">${viaje.estado.replace('_', ' ')}</span></td>
+                    <td>${viaje.pasajeros_totales || 0}</td>
                 `;
-                tbody.innerHTML += row;
+                tbody.appendChild(row);
             });
         }
 
-        window.logout = function() {
-            localStorage.removeItem('token');
-            location.href = '/login';
-        };
+        // Logout
+        function logout() {
+            if (confirm('¿Está seguro de cerrar sesión?')) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        }
 
-        // Inicializar
-        cargarDashboard();
+        // Cargar nombre del usuario de la sesión
+        async function cargarInfoUsuario() {
+            try {
+                const response = await fetch('/api/auth/verify');
+                const result = await response.json();
+                
+                if (result.success && result.user) {
+                    document.getElementById('userName').textContent = result.user.nombre || 'Administrador';
+                }
+            } catch (error) {
+                console.error('Error al cargar usuario:', error);
+            }
+        }
+
+        // Función para actualizar automáticamente cada 30 segundos
+        function iniciarActualizacionAutomatica() {
+            setInterval(() => {
+                cargarEstadisticas();
+                cargarViajesRecientes();
+            }, 30000); // 30 segundos
+        }
+
+        // Inicializar dashboard
+        async function inicializarDashboard() {
+            await cargarInfoUsuario();
+            await cargarEstadisticas();
+            await cargarViajesRecientes();
+            iniciarActualizacionAutomatica();
+        }
+
+        // Cargar todo al iniciar
+        inicializarDashboard();
     </script>
 </body>
 </html>

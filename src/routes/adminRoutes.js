@@ -1,118 +1,107 @@
 // routes/adminRoutes.js
 import { Router } from 'express';
 import { requireAuthAPI, requireRoleAPI } from '../middlewares/authMiddleware.js';
-import Ruta from '../models/Ruta.js';
+import AdminController from '../controllers/AdminController.js';
 
 const router = Router();
 
-// ============ GESTIÓN DE RUTAS (sin controlador por ahora) ============
+// ============ GESTIÓN DE RUTAS ============
 
 router.get('/rutas', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
-    try {
-        const rutas = await Ruta.findAll();
-        res.json({
-            success: true,
-            data: rutas
-        });
-    } catch (error) {
-        console.error('Error al obtener rutas:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
+    await AdminController.getAllRutas(req, res);
 });
 
 router.post('/rutas', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
-    try {
-        const { nombre, distancia_km, duracion_estimada } = req.body;
-        const idRuta = await Ruta.create({ nombre, distancia_km, duracion_estimada });
-        res.json({
-            success: true,
-            message: 'Ruta creada exitosamente',
-            data: { id: idRuta }
-        });
-    } catch (error) {
-        console.error('Error al crear ruta:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
+    await AdminController.createRuta(req, res);
 });
 
 router.put('/rutas/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
-    try {
-        const { id } = req.params;
-        const datos = req.body;
-        const updated = await Ruta.update(id, datos);
-        
-        if (!updated) {
-            return res.status(404).json({
-                success: false,
-                message: 'Ruta no encontrada'
-            });
-        }
-
-        res.json({
-            success: true,
-            message: 'Ruta actualizada exitosamente'
-        });
-    } catch (error) {
-        console.error('Error al actualizar ruta:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
+    await AdminController.updateRuta(req, res);
 });
 
 router.delete('/rutas/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deleted = await Ruta.delete(id);
-        
-        if (!deleted) {
-            return res.status(404).json({
-                success: false,
-                message: 'Ruta no encontrada'
-            });
-        }
-
-        res.json({
-            success: true,
-            message: 'Ruta eliminada exitosamente'
-        });
-    } catch (error) {
-        console.error('Error al eliminar ruta:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
+    await AdminController.deleteRuta(req, res);
 });
 
-// ============ GESTIÓN DE USUARIOS (stub temporal) ============
+// ============ GESTIÓN DE USUARIOS ============
 
 router.get('/usuarios', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
-    res.json({
-        success: true,
-        data: []
-    });
+    await AdminController.getAllUsuarios(req, res);
 });
 
-// ============ DASHBOARD (stub temporal) ============
+router.post('/usuarios/conductor', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.createConductor(req, res);
+});
+
+router.put('/usuarios/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.updateUsuario(req, res);
+});
+
+router.patch('/usuarios/:id/estado', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.cambiarEstadoUsuario(req, res);
+});
+
+// ============ DASHBOARD ============
 
 router.get('/dashboard/stats', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
-    res.json({
-        success: true,
-        data: {
-            viajesHoy: 0,
-            conductoresActivos: 0,
-            clientesRegistrados: 0,
-            ingresosDelMes: 0
-        }
-    });
+    await AdminController.getStats(req, res);
+});
+router.get('/viajes', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getAllViajes(req, res);
 });
 
+router.get('/viajes/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getViajeById(req, res);
+});
+
+router.post('/viajes', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.createViaje(req, res);
+});
+
+router.put('/viajes/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.updateViaje(req, res);
+});
+
+router.delete('/viajes/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.deleteViaje(req, res);
+});
+
+router.patch('/viajes/:id/estado', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.cambiarEstadoViaje(req, res);
+});
+
+router.get('/conductores/disponibles', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getConductoresDisponibles(req, res);
+});
+
+router.get('/costos/historico', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getAllCostos(req, res);
+});
+
+router.get('/costos/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getCostoById(req, res);
+});
+
+router.post('/costos', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.createCosto(req, res);
+});
+
+router.put('/costos/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.updateCosto(req, res);
+});
+
+router.delete('/costos/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.deleteCosto(req, res);
+});
+
+router.get('/costos/viaje/:id', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getCostosPorViaje(req, res);
+});
+
+router.get('/costos/analisis/por-tipo', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getCostosPorTipo(req, res);
+});
+router.get('/viajes/estadisticas/resumen', requireAuthAPI, requireRoleAPI(['admin']), async (req, res) => {
+    await AdminController.getEstadisticasViajes(req, res);
+});
 export default router;

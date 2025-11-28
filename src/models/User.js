@@ -1,55 +1,47 @@
+// models/User.js
 import db from '../config/db.js';
 
 class User {
-    static async findByEmail(email) {
-        try {
-            
-            const query = 'SELECT * FROM usuario WHERE correo = ?';
-            
-            const [rows] = await db.query(query, [email]);
-            
-            if (rows.length > 0) {
-                console.log('Usuario encontrado:', rows[0].nombre);
-            }
-            
-            return rows[0] || null;
+    static async query(sql, params = []) {
+        return await db.query(sql, params);
+    }
 
+    static async findByEmail(correo) {
+        try {
+            const [rows] = await db.query(
+                'SELECT * FROM usuario WHERE correo = ?',
+                [correo]
+            );
+            return rows.length > 0 ? rows[0] : null;
         } catch (error) {
-            throw new Error("Error al buscar usuario: " + error.message);
+            throw new Error('Error al buscar usuario: ' + error.message);
         }
     }
 
-    static async create(data) {
+    static async create(userData) {
         try {
-            const { nombre, cedula, correo, contrasena, telefono, rol } = data;
+            const { nombre, cedula, correo, contrasena, telefono, rol, estado } = userData;
+            
             const [result] = await db.query(
-                'INSERT INTO usuario (nombre, cedula, correo, contrasena, telefono, rol) VALUES (?, ?, ?, ?, ?, ?)',
-                [nombre, cedula, correo, contrasena, telefono, rol || 1]
+                'INSERT INTO usuario (nombre, cedula, correo, contrasena, telefono, rol, estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [nombre, cedula, correo, contrasena, telefono, rol || 1, estado || 'activo']
             );
+            
             return result.insertId;
         } catch (error) {
-            throw new Error("Error al crear usuario: " + error.message);
+            throw new Error('Error al crear usuario: ' + error.message);
         }
     }
 
-    static async updatePassword(idUsuario, nuevaContrasena) {
+    static async updatePassword(id, nuevaContrasena) {
         try {
-            await db.query(
+            const [result] = await db.query(
                 'UPDATE usuario SET contrasena = ? WHERE id_usuario = ?',
-                [nuevaContrasena, idUsuario]
+                [nuevaContrasena, id]
             );
-            return true;
+            return result.affectedRows > 0;
         } catch (error) {
-            throw new Error("Error al actualizar contraseña: " + error.message);
-        }
-    }
-
-    static async findById(id) {
-        try {
-            const [rows] = await db.query('SELECT * FROM usuario WHERE id_usuario = ?', [id]);
-            return rows[0] || null;
-        } catch (error) {
-            throw new Error("Error al buscar usuario: " + error.message);
+            throw new Error('Error al actualizar contraseña: ' + error.message);
         }
     }
 }

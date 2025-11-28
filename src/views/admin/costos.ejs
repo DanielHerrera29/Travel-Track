@@ -25,6 +25,7 @@
             background: #2c3e50;
             color: white;
             padding: 20px 0;
+            overflow-y: auto;
         }
 
         .sidebar-header {
@@ -80,7 +81,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
         .btn-primary {
@@ -88,9 +89,35 @@
             color: white;
         }
 
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
         .btn-success {
-            background: #2ecc71;
+            background: #27ae60;
             color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
         }
 
         .btn-sm {
@@ -133,6 +160,7 @@
             padding: 25px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
 
         .filters {
@@ -192,12 +220,14 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
+            overflow-y: auto;
         }
 
         .modal.active {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .modal-content {
@@ -206,6 +236,11 @@
             border-radius: 8px;
             max-width: 500px;
             width: 90%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
         }
 
         .form-group {
@@ -228,6 +263,13 @@
             border-radius: 5px;
         }
 
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
         .modal-actions {
             display: flex;
             gap: 10px;
@@ -238,6 +280,41 @@
         .loader {
             text-align: center;
             padding: 20px;
+            color: #3498db;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .monto-total {
+            font-weight: 600;
+            color: #e74c3c;
         }
     </style>
 </head>
@@ -263,6 +340,8 @@
             <button class="btn btn-primary" onclick="logout()">Cerrar Sesión</button>
         </div>
 
+        <div id="alertContainer"></div>
+
         <!-- Estadísticas -->
         <div class="stats-grid">
             <div class="stat-card warning">
@@ -274,15 +353,17 @@
                 <div class="value" id="cantidadGastos">0</div>
             </div>
             <div class="stat-card info">
-                <h3>Promedio por Viaje</h3>
-                <div class="value" id="promedioViaje">$0</div>
+                <h3>Promedio por Gasto</h3>
+                <div class="value" id="promedioGasto">$0</div>
             </div>
         </div>
 
         <div class="content-section">
             <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
                 <h2>Registro de Costos</h2>
-                <button class="btn btn-success" onclick="abrirModalRegistrar()">+ Registrar Costo</button>
+                <button class="btn btn-success" onclick="abrirModalRegistrar()">
+                    + Registrar Costo
+                </button>
             </div>
 
             <div class="filters">
@@ -301,45 +382,56 @@
                 </div>
             </div>
 
-            <div id="loader" class="loader" style="display:none;">Cargando costos...</div>
+            <div id="loader" class="loader" style="display:none;">
+                Cargando costos...
+            </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Viaje / Ruta</th>
-                        <th>Descripción</th>
-                        <th>Monto</th>
-                    </tr>
-                </thead>
-                <tbody id="costosBody">
-                </tbody>
-            </table>
+            <div id="tableContainer">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha Registro</th>
+                            <th>Viaje / Ruta</th>
+                            <th>Conductor</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="costosBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <p>No hay costos registrados con los filtros aplicados</p>
+            </div>
         </div>
     </div>
 
     <!-- Modal Registrar Costo -->
     <div id="modalCosto" class="modal">
         <div class="modal-content">
-            <h3>Registrar Nuevo Costo</h3>
+            <h3 id="modalTitulo">Registrar Nuevo Costo</h3>
             <form id="formCosto">
+                <input type="hidden" id="costoId">
                 <div class="form-group">
-                    <label>Viaje:</label>
+                    <label>Viaje: *</label>
                     <select id="id_viaje" required>
                         <option value="">Seleccione un viaje</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Descripción:</label>
+                    <label>Descripción: *</label>
                     <textarea id="descripcion" rows="3" placeholder="Ej: Combustible, peaje, mantenimiento..." required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Monto ($):</label>
+                    <label>Monto ($): *</label>
                     <input type="number" id="monto" min="0" step="0.01" placeholder="0.00" required>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Registrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </form>
         </div>
@@ -347,91 +439,141 @@
 
     <script>
         let costos = [];
+        let editando = false;
 
+        // Función para mostrar alertas
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.textContent = mensaje;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Cargar costos
         async function cargarCostos(filtros = {}) {
-            document.getElementById('loader').style.display = 'block';
+            const loader = document.getElementById('loader');
+            const tableContainer = document.getElementById('tableContainer');
+            const emptyState = document.getElementById('emptyState');
             
-            const params = new URLSearchParams(filtros);
-            
-            try {
-                const response = await fetch(`/api/admin/costos/historico?${params}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+            loader.style.display = 'block';
+            tableContainer.style.display = 'none';
+            emptyState.style.display = 'none';
 
+            try {
+                const params = new URLSearchParams();
+                if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+                if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+
+                const response = await fetch(`/api/admin/costos/historico?${params}`);
                 const result = await response.json();
+
+                loader.style.display = 'none';
 
                 if (result.success) {
                     costos = result.data;
-                    renderizarCostos(costos);
                     
                     // Actualizar estadísticas
                     if (result.resumen) {
                         document.getElementById('totalCostos').textContent = 
-                            '$' + (result.resumen.total || 0).toLocaleString('es-CO');
+                            '$' + (result.resumen.total || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 });
                         document.getElementById('cantidadGastos').textContent = 
                             result.resumen.cantidad || 0;
-                        const promedio = result.resumen.cantidad > 0 
-                            ? result.resumen.total / result.resumen.cantidad 
-                            : 0;
-                        document.getElementById('promedioViaje').textContent = 
-                            '$' + promedio.toLocaleString('es-CO', { maximumFractionDigits: 0 });
+                        document.getElementById('promedioGasto').textContent = 
+                            '$' + (result.resumen.promedio || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 });
                     }
+
+                    if (costos.length > 0) {
+                        renderizarCostos(costos);
+                        tableContainer.style.display = 'block';
+                    } else {
+                        emptyState.style.display = 'block';
+                    }
+                } else {
+                    mostrarAlerta('Error al cargar costos: ' + result.message, 'danger');
+                    emptyState.style.display = 'block';
                 }
             } catch (error) {
-                alert('Error al cargar costos: ' + error.message);
-            } finally {
-                document.getElementById('loader').style.display = 'none';
+                loader.style.display = 'none';
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
+                emptyState.style.display = 'block';
             }
         }
 
+        // Renderizar costos
         function renderizarCostos(costos) {
             const tbody = document.getElementById('costosBody');
-            
-            if (costos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 40px;">No hay costos registrados</td></tr>';
-                return;
-            }
+            tbody.innerHTML = '';
 
-            tbody.innerHTML = costos.map(costo => {
-                const fecha = new Date(costo.fecha);
+            costos.forEach(costo => {
+                const fecha = new Date(costo.fecha + 'T00:00:00');
                 const fechaFormateada = fecha.toLocaleDateString('es-CO');
 
-                return `
-                    <tr>
-                        <td>${fechaFormateada}</td>
-                        <td>${costo.ruta_nombre || 'N/A'}</td>
-                        <td>${costo.descripcion}</td>
-                        <td style="font-weight: 600; color: #e74c3c;">
-                            $${parseFloat(costo.monto).toLocaleString('es-CO')}
-                        </td>
-                    </tr>
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${fechaFormateada}</td>
+                    <td>${costo.ruta_nombre || 'N/A'}</td>
+                    <td>${costo.conductor_nombre || 'Sin asignar'}</td>
+                    <td>${costo.descripcion}</td>
+                    <td class="monto-total">
+                        $${parseFloat(costo.monto).toLocaleString('es-CO', { maximumFractionDigits: 0 })}
+                    </td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-warning" onclick="editarCosto(${costo.id_gasto})">
+                            Editar
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarCosto(${costo.id_gasto})">
+                            Eliminar
+                        </button>
+                    </td>
                 `;
-            }).join('');
+                tbody.appendChild(row);
+            });
         }
 
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const filtros = {
+                fechaInicio: document.getElementById('fechaInicio').value,
+                fechaFin: document.getElementById('fechaFin').value
+            };
+            cargarCostos(filtros);
+        }
+
+        // Limpiar filtros
+        function limpiarFiltros() {
+            document.getElementById('fechaInicio').value = '';
+            document.getElementById('fechaFin').value = '';
+            cargarCostos();
+        }
+
+        // Abrir modal registrar
         async function abrirModalRegistrar() {
-            await cargarViajesRecientes();
+            editando = false;
+            document.getElementById('costoId').value = '';
+            document.getElementById('modalTitulo').textContent = 'Registrar Nuevo Costo';
             document.getElementById('formCosto').reset();
+            
+            await cargarViajesRecientes();
             document.getElementById('modalCosto').classList.add('active');
         }
 
+        // Cargar viajes recientes
         async function cargarViajesRecientes() {
             try {
-                const response = await fetch('/api/admin/viajes', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+                const response = await fetch('/api/admin/viajes');
                 const result = await response.json();
                 
                 if (result.success) {
                     const select = document.getElementById('id_viaje');
                     select.innerHTML = '<option value="">Seleccione un viaje</option>' +
                         result.data.map(v => {
-                            const fecha = new Date(v.fecha).toLocaleDateString('es-CO');
-                            return `<option value="${v.id_viaje}">${v.ruta_nombre} - ${fecha}</option>`;
+                            const fecha = new Date(v.fecha + 'T00:00:00').toLocaleDateString('es-CO');
+                            return `<option value="${v.id_viaje}">${v.ruta_nombre} - ${fecha} - ${v.conductor_nombre}</option>`;
                         }).join('');
                 }
             } catch (error) {
@@ -439,32 +581,60 @@
             }
         }
 
+        // Editar costo
+        async function editarCosto(id) {
+            editando = true;
+            const costo = costos.find(c => c.id_gasto === id);
+            if (!costo) return;
+
+            document.getElementById('modalTitulo').textContent = 'Editar Costo';
+            document.getElementById('costoId').value = id;
+            
+            await cargarViajesRecientes();
+            
+            document.getElementById('id_viaje').value = costo.id_viaje;
+            document.getElementById('descripcion').value = costo.descripcion;
+            document.getElementById('monto').value = costo.monto;
+            
+            // Deshabilitar el selector de viaje al editar
+            document.getElementById('id_viaje').disabled = true;
+            
+            document.getElementById('modalCosto').classList.add('active');
+        }
+
+        // Eliminar costo
+        async function eliminarCosto(id) {
+            if (!confirm('¿Está seguro de eliminar este costo?')) return;
+
+            try {
+                const response = await fetch(`/api/admin/costos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarAlerta('Costo eliminado exitosamente', 'success');
+                    cargarCostos();
+                } else {
+                    mostrarAlerta('Error: ' + result.message, 'danger');
+                }
+            } catch (error) {
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
+            }
+        }
+
+        // Cerrar modal
         function cerrarModal() {
             document.getElementById('modalCosto').classList.remove('active');
+            document.getElementById('id_viaje').disabled = false;
         }
 
-        function aplicarFiltros() {
-            const filtros = {
-                fechaInicio: document.getElementById('fechaInicio').value,
-                fechaFin: document.getElementById('fechaFin').value
-            };
-            
-            Object.keys(filtros).forEach(key => {
-                if (!filtros[key]) delete filtros[key];
-            });
-            
-            cargarCostos(filtros);
-        }
-
-        function limpiarFiltros() {
-            document.getElementById('fechaInicio').value = '';
-            document.getElementById('fechaFin').value = '';
-            cargarCostos();
-        }
-
+        // Submit form
         document.getElementById('formCosto').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const id = document.getElementById('costoId').value;
             const datos = {
                 id_viaje: parseInt(document.getElementById('id_viaje').value),
                 descripcion: document.getElementById('descripcion').value,
@@ -472,11 +642,13 @@
             };
 
             try {
-                const response = await fetch('/api/admin/costos', {
-                    method: 'POST',
+                const url = id ? `/api/admin/costos/${id}` : '/api/admin/costos';
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(datos)
                 });
@@ -484,24 +656,34 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('Costo registrado exitosamente');
+                    mostrarAlerta(result.message, 'success');
                     cerrarModal();
                     cargarCostos();
                 } else {
-                    alert('Error: ' + result.message);
+                    mostrarAlerta('Error: ' + result.message, 'danger');
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
             }
         });
 
+        // Logout
         function logout() {
-            localStorage.removeItem('token');
-            location.href = '/login';
+            if (confirm('¿Está seguro de cerrar sesión?')) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                cerrarModal();
+            }
         }
 
         // Cargar al iniciar
         cargarCostos();
     </script>
 </body>
-</html> 
+</html>

@@ -92,6 +92,24 @@
             background: #2980b9;
         }
 
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
         .content-section {
             background: white;
             padding: 25px;
@@ -172,6 +190,11 @@
             color: #856404;
         }
 
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
         .actions {
             display: flex;
             gap: 5px;
@@ -226,6 +249,12 @@
             border-radius: 5px;
         }
 
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
         .modal-actions {
             display: flex;
             gap: 10px;
@@ -236,6 +265,36 @@
         .loader {
             text-align: center;
             padding: 20px;
+            color: #3498db;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
         }
     </style>
 </head>
@@ -261,10 +320,14 @@
             <button class="btn btn-primary" onclick="logout()">Cerrar Sesión</button>
         </div>
 
+        <div id="alertContainer"></div>
+
         <div class="content-section">
             <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
                 <h2>Usuarios del Sistema</h2>
-                <button class="btn btn-primary" onclick="abrirModalCrear()">Nuevo Conductor</button>
+                <button class="btn btn-primary" onclick="abrirModalCrear()">
+                    + Nuevo Conductor
+                </button>
             </div>
 
             <div class="filters">
@@ -291,136 +354,242 @@
                 </div>
             </div>
 
-            <div id="loader" class="loader" style="display:none;">Cargando...</div>
+            <div id="loader" class="loader" style="display:none;">
+                Cargando usuarios...
+            </div>
 
-            <table id="tablaUsuarios">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Cédula</th>
-                        <th>Correo</th>
-                        <th>Teléfono</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="usuariosBody">
-                </tbody>
-            </table>
+            <div id="tableContainer">
+                <table id="tablaUsuarios">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuariosBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <p>No se encontraron usuarios con los filtros aplicados</p>
+            </div>
         </div>
     </div>
 
-    <!-- Modal Crear/Editar -->
+    <!-- Modal Crear Conductor -->
     <div id="modalUsuario" class="modal">
         <div class="modal-content">
             <h3 id="modalTitulo">Nuevo Conductor</h3>
             <form id="formUsuario">
                 <div class="form-group">
-                    <label>Nombre:</label>
-                    <input type="text" id="nombre" required>
+                    <label>Nombre Completo: *</label>
+                    <input type="text" id="nombre" required placeholder="Ej: Juan Pérez">
                 </div>
                 <div class="form-group">
-                    <label>Cédula:</label>
-                    <input type="text" id="cedula" required>
+                    <label>Cédula: *</label>
+                    <input type="text" id="cedula" required placeholder="Ej: 1234567890">
                 </div>
                 <div class="form-group">
-                    <label>Correo:</label>
-                    <input type="email" id="correo" required>
+                    <label>Correo Electrónico: *</label>
+                    <input type="email" id="correo" required placeholder="Ej: conductor@ejemplo.com">
                 </div>
                 <div class="form-group">
-                    <label>Teléfono:</label>
-                    <input type="text" id="telefono" required>
+                    <label>Teléfono: *</label>
+                    <input type="text" id="telefono" required placeholder="Ej: 3001234567">
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Conductor</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script type="module">
-        import AdminViewModel from '/js/viewmodels/AdminViewModel.js';
+    <!-- Modal Editar Usuario -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content">
+            <h3>Editar Usuario</h3>
+            <form id="formEditar">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Nombre: *</label>
+                    <input type="text" id="editNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono: *</label>
+                    <input type="text" id="editTelefono" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" onclick="cerrarModalEditar()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        const viewModel = new AdminViewModel();
+    <script>
+        // Estado global
+        let usuarios = [];
         let usuarioEditando = null;
 
-        async function cargarUsuarios(filtros = {}) {
-            document.getElementById('loader').style.display = 'block';
-            const result = await viewModel.cargarUsuarios(filtros);
-            document.getElementById('loader').style.display = 'none';
+        // Función para mostrar alertas
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.textContent = mensaje;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
 
-            if (result.success) {
-                renderizarUsuarios(result.data);
-            } else {
-                alert('Error al cargar usuarios: ' + result.message);
+        // Función para cargar usuarios
+        async function cargarUsuarios(filtros = {}) {
+            const loader = document.getElementById('loader');
+            const tableContainer = document.getElementById('tableContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            loader.style.display = 'block';
+            tableContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            try {
+                // Construir query string
+                const params = new URLSearchParams();
+                if (filtros.rol) params.append('rol', filtros.rol);
+                if (filtros.estado) params.append('estado', filtros.estado);
+                if (filtros.busqueda) params.append('busqueda', filtros.busqueda);
+
+                const response = await fetch(`/api/admin/usuarios?${params.toString()}`);
+                const result = await response.json();
+
+                loader.style.display = 'none';
+
+                if (result.success) {
+                    usuarios = result.data;
+                    if (usuarios.length > 0) {
+                        renderizarUsuarios(usuarios);
+                        tableContainer.style.display = 'block';
+                    } else {
+                        emptyState.style.display = 'block';
+                    }
+                } else {
+                    mostrarAlerta('Error al cargar usuarios: ' + result.message, 'danger');
+                    emptyState.style.display = 'block';
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
+                emptyState.style.display = 'block';
             }
         }
 
+        // Función para renderizar usuarios
         function renderizarUsuarios(usuarios) {
             const tbody = document.getElementById('usuariosBody');
             tbody.innerHTML = '';
 
             usuarios.forEach(usuario => {
                 const estadoBadge = usuario.estado === 'activo' ? 'badge-success' : 'badge-danger';
-                const rolBadge = usuario.rol === 3 ? 'badge-warning' : 'badge-success';
+                let rolBadge = 'badge-info';
+                if (usuario.rol === 3) rolBadge = 'badge-warning';
+                else if (usuario.rol === 2) rolBadge = 'badge-danger';
 
-                const row = `
-                    <tr>
-                        <td>${usuario.nombre}</td>
-                        <td>${usuario.cedula}</td>
-                        <td>${usuario.correo}</td>
-                        <td>${usuario.telefono}</td>
-                        <td><span class="badge ${rolBadge}">${usuario.rol_texto}</span></td>
-                        <td><span class="badge ${estadoBadge}">${usuario.estado}</span></td>
-                        <td class="actions">
-                            ${usuario.rol === 3 ? `
-                                <button class="btn btn-sm btn-primary" onclick="editarUsuario(${usuario.id_usuario})">Editar</button>
-                                <button class="btn btn-sm ${usuario.estado === 'activo' ? 'btn-danger' : 'btn-success'}" 
-                                    onclick="cambiarEstado(${usuario.id_usuario}, '${usuario.estado === 'activo' ? 'inactivo' : 'activo'}')">
-                                    ${usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}
-                                </button>
-                            ` : '-'}
-                        </td>
-                    </tr>
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${usuario.nombre}</td>
+                    <td>${usuario.cedula}</td>
+                    <td>${usuario.correo}</td>
+                    <td>${usuario.telefono}</td>
+                    <td><span class="badge ${rolBadge}">${usuario.rol_texto}</span></td>
+                    <td><span class="badge ${estadoBadge}">${usuario.estado}</span></td>
+                    <td class="actions">
+                        ${usuario.rol === 3 ? `
+                            <button class="btn btn-sm btn-primary" onclick="editarUsuario(${usuario.id_usuario}, '${usuario.nombre}', '${usuario.telefono}')">
+                                Editar
+                            </button>
+                            <button class="btn btn-sm ${usuario.estado === 'activo' ? 'btn-danger' : 'btn-success'}" 
+                                onclick="cambiarEstado(${usuario.id_usuario}, '${usuario.estado === 'activo' ? 'inactivo' : 'activo'}')">
+                                ${usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                            </button>
+                        ` : '-'}
+                    </td>
                 `;
-                tbody.innerHTML += row;
+                tbody.appendChild(row);
             });
         }
 
-        window.aplicarFiltros = function() {
+        // Aplicar filtros
+        function aplicarFiltros() {
             const filtros = {
                 rol: document.getElementById('filtroRol').value,
                 estado: document.getElementById('filtroEstado').value,
                 busqueda: document.getElementById('filtroBusqueda').value
             };
             cargarUsuarios(filtros);
-        };
+        }
 
-        window.abrirModalCrear = function() {
-            usuarioEditando = null;
-            document.getElementById('modalTitulo').textContent = 'Nuevo Conductor';
+        // Abrir modal crear
+        function abrirModalCrear() {
             document.getElementById('formUsuario').reset();
+            document.getElementById('modalTitulo').textContent = 'Nuevo Conductor';
             document.getElementById('modalUsuario').classList.add('active');
-        };
+        }
 
-        window.cerrarModal = function() {
+        // Cerrar modal crear
+        function cerrarModal() {
             document.getElementById('modalUsuario').classList.remove('active');
-        };
+        }
 
-        window.cambiarEstado = async function(id, estado) {
-            if (confirm(`¿Está seguro de ${estado === 'activo' ? 'activar' : 'desactivar'} este usuario?`)) {
-                const result = await viewModel.cambiarEstadoUsuario(id, estado);
+        // Editar usuario
+        function editarUsuario(id, nombre, telefono) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editNombre').value = nombre;
+            document.getElementById('editTelefono').value = telefono;
+            document.getElementById('modalEditar').classList.add('active');
+        }
+
+        // Cerrar modal editar
+        function cerrarModalEditar() {
+            document.getElementById('modalEditar').classList.remove('active');
+        }
+
+        // Cambiar estado
+        async function cambiarEstado(id, nuevoEstado) {
+            const accion = nuevoEstado === 'activo' ? 'activar' : 'desactivar';
+            if (!confirm(`¿Está seguro de ${accion} este usuario?`)) return;
+
+            try {
+                const response = await fetch(`/api/admin/usuarios/${id}/estado`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                const result = await response.json();
+
                 if (result.success) {
-                    alert('Estado actualizado');
+                    mostrarAlerta(result.message, 'success');
                     cargarUsuarios();
                 } else {
-                    alert('Error: ' + result.message);
+                    mostrarAlerta('Error: ' + result.message, 'danger');
                 }
+            } catch (error) {
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
             }
-        };
+        }
 
+        // Submit crear conductor
         document.getElementById('formUsuario').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -431,23 +600,84 @@
                 telefono: document.getElementById('telefono').value
             };
 
-            const result = await viewModel.crearConductor(datos);
-            
-            if (result.success) {
-                alert('Conductor creado exitosamente');
-                cerrarModal();
-                cargarUsuarios();
-            } else {
-                alert('Error: ' + result.message);
+            try {
+                const response = await fetch('/api/admin/usuarios/conductor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    mostrarAlerta(result.message, 'success');
+                    cerrarModal();
+                    cargarUsuarios();
+                } else {
+                    mostrarAlerta('Error: ' + result.message, 'danger');
+                }
+            } catch (error) {
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
             }
         });
 
-        window.logout = function() {
-            localStorage.removeItem('token');
-            location.href = '/login';
-        };
+        // Submit editar usuario
+        document.getElementById('formEditar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('editId').value;
+            const datos = {
+                nombre: document.getElementById('editNombre').value,
+                telefono: document.getElementById('editTelefono').value
+            };
 
-        // Cargar al iniciar
+            try {
+                const response = await fetch(`/api/admin/usuarios/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    mostrarAlerta(result.message, 'success');
+                    cerrarModalEditar();
+                    cargarUsuarios();
+                } else {
+                    mostrarAlerta('Error: ' + result.message, 'danger');
+                }
+            } catch (error) {
+                mostrarAlerta('Error de conexión: ' + error.message, 'danger');
+            }
+        });
+
+        // Logout
+        function logout() {
+            if (confirm('¿Está seguro de cerrar sesión?')) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        }
+
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            const modalUsuario = document.getElementById('modalUsuario');
+            const modalEditar = document.getElementById('modalEditar');
+            
+            if (event.target === modalUsuario) {
+                cerrarModal();
+            }
+            if (event.target === modalEditar) {
+                cerrarModalEditar();
+            }
+        }
+
+        // Cargar usuarios al iniciar
         cargarUsuarios();
     </script>
 </body>
