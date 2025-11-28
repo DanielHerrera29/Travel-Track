@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Principal</title>
+    <title><%= title || 'Travel Track' %></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -26,56 +26,172 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Logo y Navegación Izquierda -->
                 <div class="flex items-center gap-8">
-                    <div class="text-2xl font-bold text-primary">Travel Track</div>
+                    <a href="/" class="text-2xl font-bold text-primary">Travel Track</a>
                     <nav class="hidden md:flex items-center gap-6">
                         <a href="#inicio" class="text-gray-700 hover:text-accent transition-colors">Inicio</a>
-                        <a href="#productos" class="text-gray-700 hover:text-accent transition-colors">Productos</a>
-                        <a href="#soluciones" class="text-gray-700 hover:text-accent transition-colors">Soluciones</a>
-                        <a href="#recursos" class="text-gray-700 hover:text-accent transition-colors">Recursos</a>
+                        <a href="#rutas" class="text-gray-700 hover:text-accent transition-colors">Rutas</a>
+                        <a href="#nosotros" class="text-gray-700 hover:text-accent transition-colors">Nosotros</a>
+                        <a href="#contacto" class="text-gray-700 hover:text-accent transition-colors">Contacto</a>
                     </nav>
                 </div>
                 
                 <!-- Botones Derecha -->
                 <div class="flex items-center gap-4">
-                    <button class="hidden sm:block px-4 py-2 text-gray-700 hover:text-accent transition-colors">
-                        Iniciar sesión
-                    </button>
-                    <button class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        Registrarse
-                    </button>
+                    <% if (user) { %>
+                        <a href="/dashboard" class="hidden sm:block px-4 py-2 text-gray-700 hover:text-accent transition-colors">
+                            Mi Panel
+                        </a>
+                        <button onclick="logout()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            Cerrar Sesión
+                        </button>
+                    <% } else { %>
+                        <a href="/login" class="hidden sm:block px-4 py-2 text-gray-700 hover:text-accent transition-colors">
+                            Iniciar sesión
+                        </a>
+                        <a href="/register" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            Registrarse
+                        </a>
+                    <% } %>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Hero Section -->
-    <section id="inicio" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+    <section id="inicio" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white">
         <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-4xl mx-auto">
                 <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold text-primary mb-6 leading-tight">
-                    Transforma tu negocio con nuestras soluciones
+                    Viaja con Seguridad y Comodidad
                 </h1>
                 <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                    Descubre cómo podemos ayudarte a alcanzar tus objetivos con tecnología innovadora y un equipo dedicado a tu éxito.
+                    Las mejores rutas de transporte terrestre en Colombia. Conectamos las principales ciudades del país con tarifas competitivas y servicio de calidad.
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <button class="w-full sm:w-auto px-8 py-4 bg-accent text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition-colors">
-                        Comenzar ahora
-                    </button>
-                    <button class="w-full sm:w-auto px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-lg text-lg font-semibold hover:border-accent hover:text-accent transition-colors">
-                        Ver demo
-                    </button>
+                    <a href="#rutas" class="w-full sm:w-auto px-8 py-4 bg-accent text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition-colors text-center">
+                        Ver Rutas Disponibles
+                    </a>
+                    <% if (!user) { %>
+                    <a href="/register" class="w-full sm:w-auto px-8 py-4 border-2 border-accent text-accent rounded-lg text-lg font-semibold hover:bg-accent hover:text-white transition-colors text-center">
+                        Crear Cuenta
+                    </a>
+                    <% } %>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Características -->
-    <section id="productos" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <!-- Rutas Disponibles -->
+    <section id="rutas" class="py-20 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-primary mb-4">¿Por qué elegirnos?</h2>
-                <p class="text-xl text-gray-600">Características que nos hacen únicos</p>
+                <h2 class="text-4xl font-bold text-primary mb-4">Nuestras Rutas</h2>
+                <p class="text-xl text-gray-600">Conectamos las principales ciudades de Colombia</p>
+            </div>
+            
+            <% if (rutas && rutas.length > 0) { %>
+            <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+                <% rutas.forEach(ruta => { %>
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all overflow-hidden group cursor-pointer" onclick="handleRutaClick(<%= ruta.id_ruta %>, <%= user ? 'true' : 'false' %>)">
+                    <!-- Header de la tarjeta -->
+                    <div class="bg-gradient-to-r from-accent to-blue-600 p-6">
+                        <h3 class="text-2xl font-bold text-white mb-2"><%= ruta.nombre %></h3>
+                        <div class="flex items-center justify-between text-blue-100">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <%= ruta.ciudad_origen %>
+                            </span>
+                            <span>→</span>
+                            <span class="flex items-center gap-2">
+                                <%= ruta.ciudad_destino %>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Detalles de la ruta -->
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <!-- Distancia -->
+                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Distancia</p>
+                                        <p class="font-semibold text-gray-900"><%= ruta.distancia %> km</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Duración -->
+                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Duración estimada</p>
+                                        <p class="font-semibold text-gray-900"><%= ruta.duracion_formateada %></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Precio -->
+                            <div class="flex items-center justify-between py-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Precio desde</p>
+                                        <p class="text-2xl font-bold text-green-600"><%= ruta.precio_formateado %></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botón -->
+                        <div class="mt-6">
+                            <button class="w-full px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors group-hover:shadow-md">
+                                <% if (user) { %>
+                                Ver Detalles y Comprar
+                                <% } else { %>
+                                Iniciar sesión para comprar
+                                <% } %>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+            <% } else { %>
+            <div class="text-center py-12">
+                <p class="text-gray-500 text-lg">No hay rutas disponibles en este momento</p>
+            </div>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- Características -->
+    <section id="nosotros" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-primary mb-4">¿Por qué viajar con nosotros?</h2>
+                <p class="text-xl text-gray-600">Compromiso con tu seguridad y comodidad</p>
             </div>
             
             <div class="grid md:grid-cols-3 gap-8">
@@ -83,84 +199,142 @@
                 <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                         <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-primary mb-2">Rápido y eficiente</h3>
-                    <p class="text-gray-600 leading-relaxed">Optimiza tus procesos y ahorra tiempo con nuestra plataforma intuitiva y potente.</p>
+                    <h3 class="text-xl font-bold text-primary mb-2">Seguridad Garantizada</h3>
+                    <p class="text-gray-600 leading-relaxed">Conductores certificados y vehículos con mantenimiento regular para tu tranquilidad.</p>
                 </div>
 
                 <!-- Tarjeta 2 -->
                 <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                         <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-primary mb-2">Seguro y confiable</h3>
-                    <p class="text-gray-600 leading-relaxed">Tus datos están protegidos con los más altos estándares de seguridad del mercado.</p>
+                    <h3 class="text-xl font-bold text-primary mb-2">Mejores Precios</h3>
+                    <p class="text-gray-600 leading-relaxed">Tarifas competitivas sin sacrificar calidad en el servicio de transporte.</p>
                 </div>
 
                 <!-- Tarjeta 3 -->
                 <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                         <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-primary mb-2">Soporte dedicado</h3>
-                    <p class="text-gray-600 leading-relaxed">Nuestro equipo está disponible 24/7 para ayudarte cuando lo necesites.</p>
+                    <h3 class="text-xl font-bold text-primary mb-2">Puntualidad</h3>
+                    <p class="text-gray-600 leading-relaxed">Respetamos tu tiempo con salidas y llegadas según lo programado.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section id="soluciones" class="py-20 px-4 sm:px-6 lg:px-8">
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-accent to-blue-600">
         <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-4xl font-bold text-primary mb-4">¿Listo para comenzar?</h2>
-            <p class="text-xl text-gray-600 mb-8">Únete a miles de empresas que ya confían en nosotros</p>
-            <button class="px-8 py-4 bg-accent text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition-colors">
-                Crear cuenta gratis
-            </button>
+            <h2 class="text-4xl font-bold text-white mb-4">¿Listo para viajar?</h2>
+            <p class="text-xl text-blue-100 mb-8">Crea tu cuenta y comienza a reservar tus pasajes hoy mismo</p>
+            <% if (!user) { %>
+            <a href="/register" class="inline-block px-8 py-4 bg-white text-accent rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                Registrarse Gratis
+            </a>
+            <% } else { %>
+            <a href="/dashboard" class="inline-block px-8 py-4 bg-white text-accent rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                Ir a Mi Panel
+            </a>
+            <% } %>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer id="recursos" class="bg-primary text-white py-12 px-4 sm:px-6 lg:px-8">
+    <footer id="contacto" class="bg-primary text-white py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
             <div class="grid md:grid-cols-4 gap-8 mb-8">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">MiEmpresa</h3>
-                    <p class="text-gray-400">Transformando negocios desde 2024</p>
+                    <h3 class="text-xl font-bold mb-4">Travel Track</h3>
+                    <p class="text-gray-400">Tu compañero de viaje confiable desde 2024</p>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-4">Producto</h4>
+                    <h4 class="font-semibold mb-4">Rutas</h4>
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">Características</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Precios</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Casos de uso</a></li>
+                        <% if (rutas && rutas.length > 0) { %>
+                            <% rutas.slice(0, 4).forEach(ruta => { %>
+                            <li><a href="#rutas" class="hover:text-white transition-colors"><%= ruta.nombre %></a></li>
+                            <% }); %>
+                        <% } %>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4">Empresa</h4>
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">Sobre nosotros</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Contacto</a></li>
+                        <li><a href="#nosotros" class="hover:text-white transition-colors">Sobre nosotros</a></li>
+                        <li><a href="#contacto" class="hover:text-white transition-colors">Contacto</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Términos y condiciones</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-4">Legal</h4>
+                    <h4 class="font-semibold mb-4">Soporte</h4>
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">Privacidad</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Términos</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Cookies</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Preguntas frecuentes</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Centro de ayuda</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Políticas</a></li>
                     </ul>
                 </div>
             </div>
-           
+            <div class="text-center text-gray-400 pt-8 border-t border-gray-800">
+                <p>&copy; 2024 Travel Track. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        // Función para manejar click en rutas
+        function handleRutaClick(idRuta, isAuthenticated) {
+            if (isAuthenticated === 'true' || isAuthenticated === true) {
+                // Si está autenticado, ir a detalles
+                window.location.href = `/ruta/${idRuta}`;
+            } else {
+                // Si no está autenticado, redirigir a login
+                window.location.href = `/login?redirect=/ruta/${idRuta}`;
+            }
+        }
+
+        // Función para cerrar sesión
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                window.location.href = '/';
+            }
+        }
+
+        // Smooth scroll para navegación
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

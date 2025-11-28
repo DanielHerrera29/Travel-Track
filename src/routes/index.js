@@ -1,9 +1,13 @@
-import { Router } from 'express'
+import { Router } from 'express';
+import webRoutes from './webRoutes.js';
+import authRoutes from './authRoutes.js';
+import rutaRoutes from './rutaRoutes.js';
 
-const router = Router()
+const router = Router();
 
-router.get('/', (req,res) => res.render('index'))
-router.get('/about', (req,res) => res.render('about'))
-router.get('/contact', (req,res) => res.render('contact'))
+router.use('/', webRoutes);
+router.use('/api/auth', authRoutes);
+router.use('/auth', authRoutes);
 
-export default router
+router.use('/rutas', rutaRoutes);
+export default router;

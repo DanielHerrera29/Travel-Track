@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 5px 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #34495e;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .content-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        table th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Sistema de Transporte</h2>
+            <p style="font-size: 12px; color: #95a5a6;">Panel Admin</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="/admin/usuarios" class="active">Gestión de Usuarios</a></li>
+            <li><a href="/admin/rutas">Gestión de Rutas</a></li>
+            <li><a href="/admin/viajes">Gestión de Viajes</a></li>
+            <li><a href="/admin/costos">Costos Operativos</a></li>
+            <li><a href="/admin/reportes">Reportes</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1>Gestión de Usuarios</h1>
+            <button class="btn btn-primary" onclick="logout()">Cerrar Sesión</button>
+        </div>
+
+        <div class="content-section">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <h2>Usuarios del Sistema</h2>
+                <button class="btn btn-primary" onclick="abrirModalCrear()">Nuevo Conductor</button>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Rol:</label>
+                    <select id="filtroRol" onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="cliente">Cliente</option>
+                        <option value="conductor">Conductor</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Estado:</label>
+                    <select id="filtroEstado" onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Buscar:</label>
+                    <input type="text" id="filtroBusqueda" placeholder="Nombre o cédula" onkeyup="aplicarFiltros()">
+                </div>
+            </div>
+
+            <div id="loader" class="loader" style="display:none;">Cargando...</div>
+
+            <table id="tablaUsuarios">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cédula</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usuariosBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Crear/Editar -->
+    <div id="modalUsuario" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitulo">Nuevo Conductor</h3>
+            <form id="formUsuario">
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Cédula:</label>
+                    <input type="text" id="cedula" required>
+                </div>
+                <div class="form-group">
+                    <label>Correo:</label>
+                    <input type="email" id="correo" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono:</label>
+                    <input type="text" id="telefono" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import AdminViewModel from '/js/viewmodels/AdminViewModel.js';
+
+        const viewModel = new AdminViewModel();
+        let usuarioEditando = null;
+
+        async function cargarUsuarios(filtros = {}) {
+            document.getElementById('loader').style.display = 'block';
+            const result = await viewModel.cargarUsuarios(filtros);
+            document.getElementById('loader').style.display = 'none';
+
+            if (result.success) {
+                renderizarUsuarios(result.data);
+            } else {
+                alert('Error al cargar usuarios: ' + result.message);
+            }
+        }
+
+        function renderizarUsuarios(usuarios) {
+            const tbody = document.getElementById('usuariosBody');
+            tbody.innerHTML = '';
+
+            usuarios.forEach(usuario => {
+                const estadoBadge = usuario.estado === 'activo' ? 'badge-success' : 'badge-danger';
+                const rolBadge = usuario.rol === 3 ? 'badge-warning' : 'badge-success';
+
+                const row = `
+                    <tr>
+                        <td>${usuario.nombre}</td>
+                        <td>${usuario.cedula}</td>
+                        <td>${usuario.correo}</td>
+                        <td>${usuario.telefono}</td>
+                        <td><span class="badge ${rolBadge}">${usuario.rol_texto}</span></td>
+                        <td><span class="badge ${estadoBadge}">${usuario.estado}</span></td>
+                        <td class="actions">
+                            ${usuario.rol === 3 ? `
+                                <button class="btn btn-sm btn-primary" onclick="editarUsuario(${usuario.id_usuario})">Editar</button>
+                                <button class="btn btn-sm ${usuario.estado === 'activo' ? 'btn-danger' : 'btn-success'}" 
+                                    onclick="cambiarEstado(${usuario.id_usuario}, '${usuario.estado === 'activo' ? 'inactivo' : 'activo'}')">
+                                    ${usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                                </button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        window.aplicarFiltros = function() {
+            const filtros = {
+                rol: document.getElementById('filtroRol').value,
+                estado: document.getElementById('filtroEstado').value,
+                busqueda: document.getElementById('filtroBusqueda').value
+            };
+            cargarUsuarios(filtros);
+        };
+
+        window.abrirModalCrear = function() {
+            usuarioEditando = null;
+            document.getElementById('modalTitulo').textContent = 'Nuevo Conductor';
+            document.getElementById('formUsuario').reset();
+            document.getElementById('modalUsuario').classList.add('active');
+        };
+
+        window.cerrarModal = function() {
+            document.getElementById('modalUsuario').classList.remove('active');
+        };
+
+        window.cambiarEstado = async function(id, estado) {
+            if (confirm(`¿Está seguro de ${estado === 'activo' ? 'activar' : 'desactivar'} este usuario?`)) {
+                const result = await viewModel.cambiarEstadoUsuario(id, estado);
+                if (result.success) {
+                    alert('Estado actualizado');
+                    cargarUsuarios();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            }
+        };
+
+        document.getElementById('formUsuario').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                cedula: document.getElementById('cedula').value,
+                correo: document.getElementById('correo').value,
+                telefono: document.getElementById('telefono').value
+            };
+
+            const result = await viewModel.crearConductor(datos);
+            
+            if (result.success) {
+                alert('Conductor creado exitosamente');
+                cerrarModal();
+                cargarUsuarios();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        });
+
+        window.logout = function() {
+            localStorage.removeItem('token');
+            location.href = '/login';
+        };
+
+        // Cargar al iniciar
+        cargarUsuarios();
+    </script>
+</body>
+</html>

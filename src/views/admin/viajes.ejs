@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Viajes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 5px 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #34495e;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .content-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        table th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Sistema de Transporte</h2>
+            <p style="font-size: 12px; color: #95a5a6;">Panel Admin</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="/admin/usuarios">Gestión de Usuarios</a></li>
+            <li><a href="/admin/rutas">Gestión de Rutas</a></li>
+            <li><a href="/admin/viajes" class="active">Gestión de Viajes</a></li>
+            <li><a href="/admin/costos">Costos Operativos</a></li>
+            <li><a href="/admin/reportes">Reportes</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1>Gestión de Viajes</h1>
+            <button class="btn btn-primary" onclick="logout()">Cerrar Sesión</button>
+        </div>
+
+        <div class="content-section">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <h2>Viajes Programados y Realizados</h2>
+                <button class="btn btn-success" onclick="abrirModalCrear()">+ Nuevo Viaje</button>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Estado:</label>
+                    <select id="filtroEstado" onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="programado">Programado</option>
+                        <option value="en_curso">En Curso</option>
+                        <option value="finalizado">Finalizado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Fecha Inicio:</label>
+                    <input type="date" id="fechaInicio" onchange="aplicarFiltros()">
+                </div>
+                <div class="filter-group">
+                    <label>Fecha Fin:</label>
+                    <input type="date" id="fechaFin" onchange="aplicarFiltros()">
+                </div>
+            </div>
+
+            <div id="loader" class="loader" style="display:none;">Cargando viajes...</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Ruta</th>
+                        <th>Conductor</th>
+                        <th>Hora Salida</th>
+                        <th>Estado</th>
+                        <th>Pasajeros</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="viajesBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Crear Viaje -->
+    <div id="modalViaje" class="modal">
+        <div class="modal-content">
+            <h3>Nuevo Viaje</h3>
+            <form id="formViaje">
+                <div class="form-group">
+                    <label>Ruta:</label>
+                    <select id="id_ruta" required>
+                        <option value="">Seleccione una ruta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Conductor:</label>
+                    <select id="id_conductor" required>
+                        <option value="">Seleccione un conductor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha:</label>
+                    <input type="date" id="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora Salida:</label>
+                    <input type="time" id="hora_salida" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora Llegada:</label>
+                    <input type="time" id="hora_llegada" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Viaje</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let viajes = [];
+
+        async function cargarViajes(filtros = {}) {
+            document.getElementById('loader').style.display = 'block';
+            
+            const params = new URLSearchParams(filtros);
+            
+            try {
+                const response = await fetch(`/api/admin/viajes?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    viajes = result.data;
+                    renderizarViajes(viajes);
+                }
+            } catch (error) {
+                alert('Error al cargar viajes: ' + error.message);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        function renderizarViajes(viajes) {
+            const tbody = document.getElementById('viajesBody');
+            
+            if (viajes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px;">No hay viajes registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = viajes.map(viaje => {
+                const estadoBadge = {
+                    'programado': 'badge-warning',
+                    'en_curso': 'badge-info',
+                    'finalizado': 'badge-success',
+                    'cancelado': 'badge-danger'
+                }[viaje.estado] || 'badge-warning';
+
+                const fecha = new Date(viaje.fecha);
+                const fechaFormateada = fecha.toLocaleDateString('es-CO');
+
+                return `
+                    <tr>
+                        <td>${fechaFormateada}</td>
+                        <td>${viaje.ruta_nombre || 'N/A'}</td>
+                        <td>${viaje.conductor_nombre || 'Sin asignar'}</td>
+                        <td>${viaje.hora_salida}</td>
+                        <td><span class="badge ${estadoBadge}">${viaje.estado}</span></td>
+                        <td>${viaje.pasajeros_totales || 0}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="verDetalle(${viaje.id_viaje})">
+                                Ver Detalle
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function abrirModalCrear() {
+            // Cargar rutas y conductores
+            await Promise.all([
+                cargarRutas(),
+                cargarConductores()
+            ]);
+            
+            document.getElementById('formViaje').reset();
+            document.getElementById('modalViaje').classList.add('active');
+        }
+
+        async function cargarRutas() {
+            try {
+                const response = await fetch('/api/admin/rutas', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const select = document.getElementById('id_ruta');
+                    select.innerHTML = '<option value="">Seleccione una ruta</option>' +
+                        result.data.map(r => `<option value="${r.id_ruta}">${r.nombre}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error al cargar rutas:', error);
+            }
+        }
+
+        async function cargarConductores() {
+            try {
+                const fecha = document.getElementById('fecha').value;
+                const url = fecha 
+                    ? `/api/admin/conductores/disponibles?fecha=${fecha}`
+                    : '/api/admin/conductores/disponibles';
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const select = document.getElementById('id_conductor');
+                    select.innerHTML = '<option value="">Seleccione un conductor</option>' +
+                        result.data.map(c => `<option value="${c.id_usuario}">${c.nombre}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error al cargar conductores:', error);
+            }
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalViaje').classList.remove('active');
+        }
+
+        function aplicarFiltros() {
+            const filtros = {
+                estado: document.getElementById('filtroEstado').value,
+                fechaInicio: document.getElementById('fechaInicio').value,
+                fechaFin: document.getElementById('fechaFin').value
+            };
+            
+            // Remover valores vacíos
+            Object.keys(filtros).forEach(key => {
+                if (!filtros[key]) delete filtros[key];
+            });
+            
+            cargarViajes(filtros);
+        }
+
+        function verDetalle(id) {
+            // Por ahora solo mostramos un alert, puedes expandir esto
+            const viaje = viajes.find(v => v.id_viaje === id);
+            if (viaje) {
+                alert(`Detalle del viaje:\n\nRuta: ${viaje.ruta_nombre}\nConductor: ${viaje.conductor_nombre}\nFecha: ${viaje.fecha}\nEstado: ${viaje.estado}`);
+            }
+        }
+
+        document.getElementById('formViaje').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const datos = {
+                id_ruta: parseInt(document.getElementById('id_ruta').value),
+                id_conductor: parseInt(document.getElementById('id_conductor').value),
+                fecha: document.getElementById('fecha').value,
+                hora_salida: document.getElementById('hora_salida').value,
+                hora_llegada: document.getElementById('hora_llegada').value
+            };
+
+            try {
+                const response = await fetch('/api/admin/viajes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Viaje creado exitosamente');
+                    cerrarModal();
+                    cargarViajes();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        // Actualizar conductores al cambiar fecha
+        document.getElementById('fecha').addEventListener('change', cargarConductores);
+
+        function logout() {
+            localStorage.removeItem('token');
+            location.href = '/login';
+        }
+
+        // Cargar al iniciar
+        cargarViajes();
+    </script>
+</body>
+</html>
