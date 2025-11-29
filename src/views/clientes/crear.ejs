@@ -1,0 +1,22 @@
+<%- include("../partials/header") %>
+
+<h3>Crear Cliente</h3>
+
+<form action="/clientes/crear" method="POST" class="mt-3">
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input name="nombre" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Correo</label>
+    <input type="email" name="correo" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Teléfono</label>
+    <input name="telefono" class="form-control">
+  </div>
+  <button class="btn btn-success">Crear</button>
+  <a href="/clientes" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<%- include("../partials/footer") %>

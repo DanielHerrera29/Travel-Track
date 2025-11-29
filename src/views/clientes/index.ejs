@@ -1,0 +1,40 @@
+<%- include("../partials/header") %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>👥 Gestión de Clientes</h2>
+  <a href="/clientes/crear" class="btn btn-primary">+ Nuevo Cliente</a>
+</div>
+
+<table class="table table-hover bg-white">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Correo</th>
+      <th>Teléfono</th>
+      <th>Fecha registro</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (clientes && clientes.length) { %>
+      <% clientes.forEach(c => { %>
+        <tr>
+          <td><%= c.nombre %></td>
+          <td><%= c.correo %></td>
+          <td><%= c.telefono || '-' %></td>
+          <td><%= c.fecha_registro ? new Date(c.fecha_registro).toLocaleDateString() : '-' %></td>
+          <td><span class="badge bg-<%= c.estado === 'activo' ? 'success' : 'secondary' %>"><%= c.estado %></span></td>
+          <td>
+            <a href="/clientes/editar/<%= c.id_usuario %>" class="btn btn-sm btn-info">Editar</a>
+            <a href="/clientes/eliminar/<%= c.id_usuario %>" class="btn btn-sm btn-danger">Desactivar</a>
+          </td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr><td colspan="6" class="text-center">No hay clientes registrados</td></tr>
+    <% } %>
+  </tbody>
+</table>
+
+<%- include("../partials/footer") %>

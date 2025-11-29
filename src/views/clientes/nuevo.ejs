@@ -1,0 +1,14 @@
+<%- include("../partials/header") %>
+
+<div class="max-w-2xl mx-auto mt-6">
+  <h2 class="text-2xl font-bold mb-4">Nuevo Cliente</h2>
+  <form action="/clientes" method="POST" class="space-y-4">
+    <input name="nombre" placeholder="Nombre completo" class="w-full border px-3 py-2" required>
+    <input name="correo" placeholder="Correo" type="email" class="w-full border px-3 py-2" required>
+    <input name="telefono" placeholder="Teléfono" class="w-full border px-3 py-2">
+    <button class="px-6 py-2 bg-accent text-white rounded">Guardar</button>
+    <a href="/clientes" class="ml-2 text-gray-600">Cancelar</a>
+  </form>
+</div>
+
+<%- include("../partials/footer") %>
